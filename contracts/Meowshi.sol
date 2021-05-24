@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-// @title Meowshi....🐈_🍣_🍱
+// @title Meowshi 🐈 🍣 🍱
 // @author Gatoshi Nyakamoto
 
 pragma solidity 0.8.4;
@@ -24,14 +24,14 @@ contract Domain {
     function _calculateDomainSeparator(uint256 chainId) private view returns (bytes32) {
         return keccak256(abi.encode(DOMAIN_SEPARATOR_SIGNATURE_HASH, chainId, address(this)));
     }
-
+    
     /// @dev Return the DOMAIN_SEPARATOR.
     function DOMAIN_SEPARATOR() public view returns (bytes32) {
         uint256 chainId;
         assembly { chainId := chainid() }
         return chainId == DOMAIN_SEPARATOR_CHAIN_ID ? _DOMAIN_SEPARATOR : _calculateDomainSeparator(chainId);
     }
-
+    
     function _getDigest(bytes32 dataHash) internal view returns (bytes32 digest) {
         digest = keccak256(abi.encodePacked(EIP191_PREFIX_FOR_EIP712_STRUCTURED_DATA, DOMAIN_SEPARATOR(), dataHash));
     }
@@ -44,7 +44,6 @@ contract Domain {
 contract ERC20 is Domain {
     /// @dev keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)").
     bytes32 constant PERMIT_SIGNATURE_HASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
-    
     /// @notice owner > spender > allowance mapping.
     mapping(address => mapping(address => uint256)) public allowance;
     /// @notice owner > balance mapping.
@@ -81,11 +80,8 @@ contract ERC20 is Domain {
     ) external {
         require(owner != address(0), "ERC20: Owner cannot be 0");
         require(block.timestamp < deadline, "ERC20: Expired");
-        require(
-            ecrecover(_getDigest(keccak256(abi.encode(PERMIT_SIGNATURE_HASH, owner, spender, amount, nonces[owner]++, deadline))), v, r, s) ==
-                owner,
-            "ERC20: Invalid Signature"
-        );
+        require(ecrecover(_getDigest(keccak256(abi.encode(PERMIT_SIGNATURE_HASH, owner, spender, amount, nonces[owner]++, deadline))), v, r, s) ==
+                owner, "ERC20: Invalid Signature");
         allowance[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
@@ -107,8 +103,7 @@ contract ERC20 is Domain {
     /// @param amount The token `amount` to move.
     /// @return (bool) Returns 'true' if succeeded.
     function transferFrom(address from, address to, uint256 amount) external returns (bool) {
-        if (allowance[from][msg.sender] != type(uint256).max) // if allowance is infinite, don't decrease it to save on gas (breaks with ERC-20)
-            allowance[from][msg.sender] -= amount;
+        if (allowance[from][msg.sender] != type(uint256).max) allowance[from][msg.sender] -= amount;
         balanceOf[from] -= amount;
         balanceOf[to] += amount; 
         emit Transfer(from, to, amount);
@@ -124,8 +119,7 @@ contract BaseBoringBatchable {
     /// @dev Helper function to extract a useful revert message from a failed call.
     function _getRevertMsg(bytes memory _returnData) private pure returns (string memory) {
         if (_returnData.length < 68) return "Transaction reverted silently"; // if length is less than 68, tx failed w/o revert message
-        assembly { _returnData := add(_returnData, 0x04) } // slice the sighash
-        return abi.decode(_returnData, (string)); // all that remains is the revert string
+        assembly { _returnData := add(_returnData, 0x04) } return abi.decode(_returnData, (string)); // all that remains is the revert string
     }
 
     /// @notice Allows batched call to self (this contract).
@@ -171,22 +165,18 @@ interface ISushiBar {
 /// @notice Meowshi takes SUSHI / xSUSHI to mint NYAN tokens that can be burned to claim SUSHI / xSUSHI from BENTO with yields.
 //  ៱˳_˳៱   ∫
 contract Meowshi is ERC20, BaseBoringBatchable {
-    IBentoBoxBasic immutable bentoBox; // BENTO vault contract - 0xF5BCE5077908a1b7370B9ae04AdC565EBd643966 (multinet)
-    ISushiBar immutable sushiToken; // SUSHI token contract - 0x6B3595068778DD592e39A122f4f5a5cF09C90fE2 (mainnet)
-    address immutable sushiBar; // xSUSHI token contract for staking SUSHI - 0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272 (mainnet)
-
+    IBentoBoxBasic constant bentoBox = IBentoBoxBasic(0xF5BCE5077908a1b7370B9ae04AdC565EBd643966); // BENTO vault contract (multinet)
+    ISushiBar constant sushiToken = ISushiBar(0x6B3595068778DD592e39A122f4f5a5cF09C90fE2); // SUSHI token contract (mainnet)
+    address constant sushiBar = 0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272; // xSUSHI token contract for staking SUSHI (mainnet)
     string public constant name = "Meowshi";
     string public constant symbol = "NYAN";
     uint8 public constant decimals = 18;
     uint256 constant multiplier = 10000; // 1 xSUSHI BENTO share = 10,000 NYAN
     uint256 public totalSupply;
     
-    constructor(IBentoBoxBasic bentoBox_, ISushiBar sushiToken_, address sushiBar_) {
-        sushiToken_.approve(sushiBar_, type(uint256).max); // max {approve} xSUSHI to draw SUSHI from this contract
-        ISushiBar(sushiBar_).approve(address(bentoBox_), type(uint256).max); // max {approve} BENTO to draw xSUSHI from this contract
-        bentoBox = bentoBox_;
-        sushiToken = sushiToken_;
-        sushiBar = sushiBar_;
+    constructor() {
+        sushiToken.approve(sushiBar, type(uint256).max); // max {approve} xSUSHI to draw SUSHI from this contract
+        ISushiBar(sushiBar).approve(address(bentoBox), type(uint256).max); // max {approve} BENTO to draw xSUSHI from this contract
     }
     
     // **** xSUSHI
