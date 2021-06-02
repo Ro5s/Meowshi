@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on 2021-06-01
-*/
-
 // SPDX-License-Identifier: UNLICENSED
 // @title Meowshi (MEOW) 🐈 🍣 🍱
 // @author Gatoshi Nyakamoto
