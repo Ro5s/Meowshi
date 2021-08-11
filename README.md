@@ -1,8 +1,10 @@
 # Meowshi
 
-## NYAN Token: 
-Mainnet: [0x650F44eD6F1FE0E1417cb4b3115d52494B4D9b6D](https://etherscan.io/address/0x650F44eD6F1FE0E1417cb4b3115d52494B4D9b6D#code)
+## MEOW Token: 
+[0x650F44eD6F1FE0E1417cb4b3115d52494B4D9b6D](https://etherscan.io/address/0x650F44eD6F1FE0E1417cb4b3115d52494B4D9b6D#code)
 
-Polygon: [WIP]
+## GovernorMeow:
+[0x623972FfaAF267A15742fFe8C73D22B0c160360c](https://etherscan.io/address/0x623972FfaAF267A15742fFe8C73D22B0c160360c#code)
 
-![nyatto](https://pbs.twimg.com/media/E1cBlOqX0AAQVs5?format=jpg&name=900x900)
+## Timelock:
+[0x0f9899494b0C4B072Eee862FBaCA17e17206202b](https://etherscan.io/address/0x0f9899494b0C4B072Eee862FBaCA17e17206202b#code)
